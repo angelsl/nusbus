@@ -1,0 +1,6 @@
+{
+  "name": "nusbus",
+  "version": "0.0.1",
+  "main": "proxy.js",
+  "license": "MIT",
+}

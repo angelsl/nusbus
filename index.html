@@ -58,7 +58,7 @@
                 div.innerText = "Error while loading results: " + this.status + " " + this.statusText;
                 replace_results_with(div);
             });
-            xhr.open("GET", "https://cors.io/?https://nextbus.comfortdelgro.com.sg/eventservice.svc/Shuttleservice?busstopname=" + stop);
+            xhr.open("GET", "https://nusbus-proxy.herokuapp.com/" + encodeURIComponent(stop));
             xhr.send();
         }
 
@@ -126,7 +126,7 @@
 
                 });
                 xhr.addEventListener("error", populate_select);
-                xhr.open("GET", "https://cors.io/?https://nextbus.comfortdelgro.com.sg/eventservice.svc/BusStops");
+                xhr.open("GET", "https://nusbus-proxy.herokuapp.com/");
                 xhr.send();
             } else {
                 stops = stored.stops;

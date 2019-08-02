@@ -58,7 +58,7 @@
                 div.innerText = "Error while loading results: " + this.status + " " + this.statusText;
                 replace_results_with(div);
             });
-            xhr.open("GET", "https://nusbus-proxy.herokuapp.com/" + encodeURIComponent(stop));
+            xhr.open("GET", "https://nusbus.angelsl.workers.dev/" + encodeURIComponent(stop));
             xhr.send();
         }
 
@@ -126,7 +126,7 @@
 
                 });
                 xhr.addEventListener("error", populate_select);
-                xhr.open("GET", "https://nusbus-proxy.herokuapp.com/");
+                xhr.open("GET", "https://nusbus.angelsl.workers.dev/");
                 xhr.send();
             } else {
                 stops = stored.stops;

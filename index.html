@@ -5,14 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script>
-        // https://nextbus.comfortdelgro.com.sg/eventservice.svc/BusStops
+        const refresh_magic = "e5piofuy49et5";
         let stops = false;
+        let favourites = new Set(JSON.parse(localStorage.getItem("nusbus_favourites")) || []);
         let refresh_date = 0;
 
         function replace_results_with(new_div) {
             let old = document.getElementById("results");
-            document.body.removeChild(old);
-            document.body.appendChild(new_div);
+            old.replaceWith(new_div);
         }
 
         function new_results_div() {
@@ -65,7 +65,7 @@
         function select_onchange() {
             document.getElementById("results").style = "display: none;";
             let stop = document.getElementById("stop").value;
-            if (stop == "-1") {
+            if (stop === refresh_magic) {
                 localStorage.removeItem("nusbus");
                 location.reload();
             } else if (stop !== "") {
@@ -86,14 +86,36 @@
             let refresh = create_option("Refresh (Last refresh: " +
                         new Date(refresh_date)
                             .toLocaleString('en-GB', { timeZone: 'Asia/Singapore' }) +
-                        ")", -1);
+                        ")", refresh_magic);
             return [divider, refresh];
         }
 
+        function compare_stop(a, b) {
+            const af = favourites.has(a.name) ? 0 : 1;
+            const bf = favourites.has(b.name) ? 0 : 1;
+            if (af !== bf) {
+                return af - bf;
+            }
+
+            const an = a.caption.toUpperCase();
+            const bn = b.caption.toUpperCase();
+            if (an < bn) {
+                return -1;
+            } else if (an > bn) {
+                return 1;
+            }
+
+            return 0;
+        }
+
         function populate_select() {
+            stops.sort(compare_stop);
             let options = [create_option("Select a stop", "")]
                 .concat(stops.map(stop =>
-                    create_option(stop.caption + " (" + stop.name + ")",
+                    create_option(
+                        (favourites.has(stop.name) ? "★ " : "")
+                        + stop.caption
+                        + " (" + stop.name + ")",
                         stop.name)))
                 .concat(create_refresh());
 
@@ -105,7 +127,7 @@
             new_select.disabled = false;
             new_select.value = old_select.value;
             new_select.onchange = select_onchange;
-            old_select.parentNode.replaceChild(new_select, old_select);
+            old_select.replaceWith(new_select);
         }
 
         function refresh_stops() {
@@ -135,12 +157,28 @@
             }
         }
 
+        function favourite_onclick() {
+            let stop = document.getElementById("stop").value;
+            if (stop === refresh_magic || stop === "") {
+                return;
+            }
+
+            if (favourites.has(stop)) {
+                favourites.delete(stop);
+            } else {
+                favourites.add(stop);
+            }
+
+            localStorage.setItem("nusbus_favourites", JSON.stringify([...favourites]));
+            populate_select();
+        }
+
         window.onload = function() {
             refresh_stops();
         };
     </script>
     <style>
-        #stop, #refresh {
+        #stop, #refresh, #favourite {
             width: 100%;
             font-size: 24px;
         }
@@ -152,18 +190,26 @@
         ul {
             margin-top: 1ex;
         }
+
+        #results {
+            margin-top: 1ex;
+            margin-bottom: 1ex;
+        }
     </style>
 </head>
 <body>
     <div>
-        <select id="stop" disabled="disabled">
+        <select id="stop" disabled>
             <option value="">Loading...</option>
         </select>
     </div>
     <div>
         <button id="refresh" onclick="select_onchange();">Refresh</button>
     </div>
-    <div id="results">
+    <div id="results" style="display: none;">
+    </div>
+    <div>
+        <button id="favourite" onclick="favourite_onclick();">Un/favourite</button>
     </div>
 </body>
 </html>

@@ -171,14 +171,32 @@
 
             localStorage.setItem("nusbus_favourites", JSON.stringify([...favourites]));
             populate_select();
+            make_favourite_buttons();
+        }
+
+        function make_favourite_buttons() {
+            let div = document.createElement("div");
+            div.id = "favourite_buttons";
+            for (let stopName of favourites) {
+                let caption = stops.find(stop => stop.name === stopName).caption;
+                let button = document.createElement("button");
+                button.innerText = caption;
+                button.onclick = () => {
+                    document.getElementById("stop").value = stopName;
+                    select_onchange();
+                };
+                div.appendChild(button);
+            }
+            document.getElementById("favourite_buttons").replaceWith(div);
         }
 
         window.onload = function() {
             refresh_stops();
+            make_favourite_buttons();
         };
     </script>
     <style>
-        #stop, #refresh, #favourite {
+        select, button {
             width: 100%;
             font-size: 24px;
         }
@@ -210,6 +228,8 @@
     </div>
     <div>
         <button id="favourite" onclick="favourite_onclick();">Un/favourite</button>
+    </div>
+    <div id="favourite_buttons">
     </div>
 </body>
 </html>

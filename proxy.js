@@ -17,9 +17,14 @@ async function handleRequest(req) {
   }
 
   let proxyUrl = stop
-    ? "https://nextbus.comfortdelgro.com.sg/eventservice.svc/Shuttleservice?busstopname=" + encodeURIComponent(decodeURIComponent(stop))
-    : "https://nextbus.comfortdelgro.com.sg/eventservice.svc/BusStops";
-  let proxyRes = await fetch(proxyUrl);
+    ? `${apiurl}/ShuttleService?busstopname=` + encodeURIComponent(decodeURIComponent(stop))
+    : `${apiurl}/BusStops`;
+  let proxyRes = await fetch(proxyUrl, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: auth
+    }
+  });
 
   if (proxyRes.status !== 200) {
       return new Response('', {status: proxyRes.status});
@@ -28,7 +33,11 @@ async function handleRequest(req) {
   let ret = new Response(proxyRes.body);
   ret.headers.append('Access-Control-Allow-Origin', 'https://angelsl.github.io');
   if (proxyRes.headers.has('Content-Type')) {
-      ret.headers.append('Content-Type', proxyRes.headers.get('Content-Type'));
+    const resContentType = proxyRes.headers.get('Content-Type');
+    const proxyContentType = resContentType.indexOf('text/html') > -1
+      ? 'application/json'
+      : resContentType;
+    ret.headers.append('Content-Type', resContentType);
   }
 
   return ret;
